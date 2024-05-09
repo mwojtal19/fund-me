@@ -1,6 +1,6 @@
 {
     "name": "hardhat-fund-me",
-    "author": "mwojtal",
+    "author": "mwojtal19",
     "scripts": {
         "test": "yarn hardhat test",
         "test:staging": "yarn hardhat test --network sepolia",
