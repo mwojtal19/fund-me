@@ -17,14 +17,13 @@ contract FundMe {
     AggregatorV3Interface private s_priceFeed;
 
     modifier onlyOwner() {
-        // require(msg.sender == owner);
         if (msg.sender != i_owner) revert FundMe__NotOwner();
         _;
     }
 
-    constructor(address priceFeedAddress) {
+    constructor(address _priceFeedAddress) {
         i_owner = msg.sender;
-        s_priceFeed = AggregatorV3Interface(priceFeedAddress);
+        s_priceFeed = AggregatorV3Interface(_priceFeedAddress);
     }
 
     function fund() public payable {
@@ -32,13 +31,11 @@ contract FundMe {
             msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD,
             "You need to spend more ETH!"
         );
-        // require(PriceConverter.getConversionRate(msg.value) >= MINIMUM_USD, "You need to spend more ETH!");
         s_addressToAmountFunded[msg.sender] += msg.value;
         s_funders.push(msg.sender);
     }
 
     function getVersion() public view returns (uint256) {
-        // ETH/USD price feed address of Sepolia Network.
         return s_priceFeed.version();
     }
 
@@ -53,12 +50,6 @@ contract FundMe {
             s_addressToAmountFunded[funder] = 0;
         }
         s_funders = new address[](0);
-        // // transfer
-        // payable(msg.sender).transfer(address(this).balance);
-        // // send
-        // bool sendSuccess = payable(msg.sender).send(address(this).balance);
-        // require(sendSuccess, "Send failed");
-        // call
         (bool callSuccess, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
@@ -69,37 +60,17 @@ contract FundMe {
         return i_owner;
     }
 
-    function getFunder(uint256 index) public view returns (address) {
-        return s_funders[index];
+    function getFunder(uint256 _index) public view returns (address) {
+        return s_funders[_index];
     }
 
     function getAddressToAmountFunded(
-        address funder
+        address _funder
     ) public view returns (uint256) {
-        return s_addressToAmountFunded[funder];
+        return s_addressToAmountFunded[_funder];
     }
 
     function getPriceFeed() public view returns (AggregatorV3Interface) {
         return s_priceFeed;
     }
-    // Explainer from: https://solidity-by-example.org/fallback/
-    // Ether is sent to contract
-    //      is msg.data empty?
-    //          /   \
-    //         yes  no
-    //         /     \
-    //    receive()?  fallback()
-    //     /   \
-    //   yes   no
-    //  /        \
-    //receive()  fallback()
 }
-
-// Concepts we didn't cover yet (will cover in later sections)
-// 1. Enum
-// 2. Events
-// 3. Try / Catch
-// 4. Function Selector
-// 5. abi.encode / decode
-// 6. Hash with keccak256
-// 7. Yul / Assembly
